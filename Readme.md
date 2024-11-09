@@ -81,3 +81,51 @@ RP/0/RP0/CPU0:PE2(config-router-af)#commit
 Lancez la commande suivante sur PE1 pour vérifier que les routes sont bien échangées via BGP :
 ```show bgp vpnv4 unicast vrf ORANGE```
 La sortie donne:
+```
+Sat Nov  9 18:15:23.773 UTC
+BGP router identifier 172.30.0.1, local AS number 65000
+BGP generic scan interval 60 secs
+Non-stop routing is enabled
+BGP table state: Active
+Table ID: 0x0
+BGP main routing table version 18
+BGP NSR Initial initsync version 13 (Reached)
+BGP NSR/ISSU Sync-Group versions 0/0
+BGP scan interval 60 secs
+
+Status codes: s suppressed, d damped, h history, * valid, > best
+              i - internal, r RIB-failure, S stale, N Nexthop-discard
+Origin codes: i - IGP, e - EGP, ? - incomplete
+   Network            Next Hop            Metric LocPrf Weight Path
+Route Distinguisher: 172.30.0.1:3 (default for vrf ORANGE)
+Route Distinguisher Version: 18
+*> 30.0.1.0/24        0.0.0.0                  0         32768 ?
+*>i30.0.2.0/24        172.30.0.6               0    100      0 ?
+
+Processed 2 prefixes, 2 paths
+```
+### 2.2. Vérification de la table de routage sur PE1
+Vérifiez que les routes sont correctement installées dans la table de routage de la VRF "ORANGE" avec la commande :
+```show ip route vrf ORANGE```
+La sortie est :
+```
+RP/0/RP0/CPU0:PE1#show ip route vrf ORANGE
+Sat Nov  9 18:16:04.175 UTC
+
+Codes: C - connected, S - static, R - RIP, B - BGP, (>) - Diversion path
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - ISIS, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, su - IS-IS summary null, * - candidate default
+       U - per-user static route, o - ODR, L - local, G  - DAGR, l - LISP
+       A - access/subscriber, a - Application route
+       M - mobile route, r - RPL, t - Traffic Engineering, (!) - FRR Backup path
+
+Gateway of last resort is not set
+
+C    30.0.1.0/24 is directly connected, 01:41:03, GigabitEthernet0/0/0/3.30
+L    30.0.1.1/32 is directly connected, 01:41:03, GigabitEthernet0/0/0/3.30
+B    30.0.2.0/24 [200/0] via 172.30.0.6 (nexthop in vrf default), 00:26:42
+```
+
