@@ -153,3 +153,5 @@ avec cette commande: ```sudo bash utilis/traffic.sh start ORANGE``` qui donne ef
 
 ![image](https://github.com/user-attachments/assets/f81ff202-ef44-4884-bea3-618c1d3176bc)
 
+# Conclusion
+La configuration de l'instance VPN "ORANGE" a été réalisée avec succès sur les routeurs PE1 et PE2. Les tests de connectivité, incluant les commandes ping et traceroute, ont confirmé que le VPN est opérationnel et que les routes sont correctement échangées entre les deux points. 
