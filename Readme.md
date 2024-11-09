@@ -1,66 +1,66 @@
 # PARTIE 2: Etude des VPN et mise en place d'une nouvelle instance
 ## QUESTION 2.1:
 
-Effectuez une capture de trame entre P2 et P4 en utilisant la méthode décrite dans les annexes, lancez le trafic du VPN green. Décrivez le contenu d'un des paquets associé au traffic client dans le VPN (Couches OSI, Labels etc...).
+Effectuez une capture de trame entre P2 et P4 en utilisant la méthode décrite dans les annexes, lancez le trafic du VPN Green. Décrivez le contenu d'un des paquets associé au trafic client dans le VPN (Couches OSI, Labels, etc...).
 
-Commande utiliser:
+Commande utilisée :
 ```bash
 sudo bash utilis/traffic.sh start GREEN
 ```
 
 ---
 
-### Frame Analysis: Frame 278 and Frame 279 (VPN Green Traffic)
+### Analyse des trames : Trame 278 et Trame 279 (Trafic VPN Green)
 
-To analyze the VPN Green traffic between P2 and P4, two consecutive frames, Frame 278 and Frame 279, were captured. Both frames belong to the same TCP session, as indicated by consistent MAC and IP addresses. The following layers were analyzed according to the OSI model, with emphasis on MPLS labels and their usage.
-
----
-
-#### 1. **Physical and Data Link Layers (Layers 1 and 2)**
-   - **Frame Length**: Both frames are 74 bytes.
-   - **MAC Addresses**:
-     - **Source**: `aa:c1:ab:3d:be:22` (locally administered address).
-     - **Destination**: `aa:c1:ab:b9:0a:86` (locally administered address).
-   - **Encapsulation Type**: Ethernet II, which is typical for TCP/IP networks.
-   - **Ethertype**: MPLS label-switched packet (`0x8847`), indicating MPLS encapsulation at the Data Link layer.
-
-#### 2. **Network Layer (Layer 3) - MPLS and IP Headers**
-   - **MPLS Headers**: Both frames contain two MPLS headers.
-     - **First MPLS Header**:
-       - **Label**: 24006 – This label is used for **transport purposes**, enabling forwarding decisions in the MPLS network.
-       - **Experimental Bits (Exp)**: 0 – No priority is set.
-       - **Bottom of Stack (S)**: 0 – Indicates that there are additional labels in the stack.
-       - **Time to Live (TTL)**: 62 – Initial TTL for MPLS encapsulation.
-     - **Second MPLS Header**:
-       - **Label**: 24012 – This label is associated with **service delivery** for the VPN Green traffic, distinguishing the VPN traffic from other services.
-       - **Experimental Bits (Exp)**: 0.
-       - **Bottom of Stack (S)**: 1 – This is the last label in the MPLS stack.
-       - **Time to Live (TTL)**: 63.
-   - **IP Header**:
-     - **Source IP**: `10.0.2.10`
-     - **Destination IP**: `10.0.1.10`
-     - **Flags**: The "Don't Fragment" flag is set, indicating that fragmentation is not allowed.
-     - **Time to Live (TTL)**: 63, suggesting minimal router hops from the source.
-
-#### 3. **Transport Layer (Layer 4) - TCP**
-   - **Source Port**: 5201
-   - **Destination Port**: 55227
-   - **Sequence and Acknowledgment Numbers**:
-     - **Frame 278**: `ACK` number `279425`.
-     - **Frame 279**: `ACK` number `282305`, indicating acknowledgment of the previous segment.
-   - **Window Size**: 271 in both frames.
-   - **Flags**: ACK flag is set, with no payload data in these packets.
+Pour analyser le trafic VPN Green entre P2 et P4, deux trames consécutives, la Trame 278 et la Trame 279, ont été capturées. Les deux trames appartiennent à la même session TCP, comme indiqué par les adresses MAC et IP cohérentes. Les couches suivantes ont été analysées selon le modèle OSI, avec un accent sur les labels MPLS et leur usage.
 
 ---
 
-### Summary and Observations
-- Both frames analyzed are part of the same TCP session, with consistent source and destination addresses at both the MAC and IP layers.
-- **MPLS Labels**:
-  - The **first MPLS label (24006)** is used for **transport purposes** within the MPLS network.
-  - The **second MPLS label (24012)** is designated for **service differentiation**, specifically for the VPN Green traffic.
-- **IP and TCP Information**: Both packets use the same IP addresses and ports, with a slight increment in the acknowledgment numbers, indicating session continuity.
+#### 1. **Couches Physique et Liaison de données (Couches 1 et 2)**
+   - **Longueur de la trame** : Les deux trames mesurent 74 octets.
+   - **Adresses MAC** :
+     - **Source** : `aa:c1:ab:3d:be:22` (adresse administrée localement).
+     - **Destination** : `aa:c1:ab:b9:0a:86` (adresse administrée localement).
+   - **Type d'encapsulation** : Ethernet II, typique pour les réseaux TCP/IP.
+   - **Ethertype** : Paquet commuté par label MPLS (`0x8847`), indiquant une encapsulation MPLS au niveau de la couche Liaison de données.
 
-This packet analysis confirms the presence of MPLS labels distinguishing transport and service layers for VPN Green, with a seamless flow from PE1 to PE2. This structure allows for efficient VPN traffic management and segmentation within the MPLS network.
+#### 2. **Couche Réseau (Couche 3) - En-têtes MPLS et IP**
+   - **En-têtes MPLS** : Les deux trames contiennent deux en-têtes MPLS.
+     - **Premier en-tête MPLS** :
+       - **Label** : 24006 – Ce label est utilisé à des fins de **transport**, facilitant les décisions de routage dans le réseau MPLS.
+       - **Bits expérimentaux (Exp)** : 0 – Pas de priorité définie.
+       - **Bottom of Stack (S)** : 0 – Indique qu'il y a des labels supplémentaires dans la pile.
+       - **Time to Live (TTL)** : 62 – Durée de vie initiale pour l'encapsulation MPLS.
+     - **Deuxième en-tête MPLS** :
+       - **Label** : 24012 – Ce label est associé à la **différenciation de service** pour le trafic VPN Green, distinguant le trafic VPN des autres services.
+       - **Bits expérimentaux (Exp)** : 0.
+       - **Bottom of Stack (S)** : 1 – Dernier label dans la pile MPLS.
+       - **Time to Live (TTL)** : 63.
+   - **En-tête IP** :
+     - **IP Source** : `10.0.2.10`
+     - **IP Destination** : `10.0.1.10`
+     - **Flags** : Le drapeau "Don't Fragment" est activé, indiquant que la fragmentation n'est pas autorisée.
+     - **Time to Live (TTL)** : 63, suggérant un nombre minimal de sauts entre les routeurs.
+
+#### 3. **Couche Transport (Couche 4) - TCP**
+   - **Port source** : 5201
+   - **Port destination** : 55227
+   - **Numéros de séquence et d'acquittement** :
+     - **Trame 278** : Numéro d'ACK `279425`.
+     - **Trame 279** : Numéro d'ACK `282305`, indiquant l'acquittement du segment précédent.
+   - **Taille de fenêtre** : 271 pour les deux trames.
+   - **Drapeaux** : Le drapeau ACK est activé, sans données de charge utile dans ces paquets.
+
+---
+
+### Résumé et Observations
+- Les deux trames analysées font partie de la même session TCP, avec des adresses source et destination cohérentes aux niveaux MAC et IP.
+- **Labels MPLS** :
+  - Le **premier label MPLS (24006)** est utilisé pour le **transport** au sein du réseau MPLS.
+  - Le **deuxième label MPLS (24012)** est désigné pour la **différenciation de service**, en particulier pour le trafic VPN Green.
+- **Informations IP et TCP** : Les deux paquets utilisent les mêmes adresses IP et ports, avec un léger incrément dans les numéros d’acquittement, indiquant la continuité de la session.
+
+Cette analyse de paquet confirme la présence de labels MPLS distinguant les couches de transport et de service pour le VPN Green, permettant un flux sans interruption de PE1 vers PE2. Cette structure assure une gestion et une segmentation efficaces du trafic VPN dans le réseau MPLS.
 ## QUESTION 2.2:
 ## QUESTION 2.3:
 ### Ajout d'une nouvelle instance VPN sur l'infrastructure
