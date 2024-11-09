@@ -1,4 +1,4 @@
-# PARTIE 2: 
+# PARTIE 2: Etude des VPN et mise en place d'une nouvelle instance
 ## QUESTION 2.3:
 ### Ajout d'une nouvelle instance VPN sur l'infrastructure
 
