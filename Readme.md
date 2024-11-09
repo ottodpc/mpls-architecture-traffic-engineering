@@ -20,3 +20,6 @@ RP/0/RP0/CPU0:PE1(config-vrf)#address-family ipv4 unicast  # Spécification de l
 RP/0/RP0/CPU0:PE1(config-vrf-af)#import route-target 65000:128  # Importation des routes depuis un autre VRF
 RP/0/RP0/CPU0:PE1(config-vrf-af)#export route-target 65000:128  # Exportation des routes vers un autre VRF
 RP/0/RP0/CPU0:PE1(config-vrf-af)#commit  # Validation de la configuration
+
+####  1.2. Configuration de l'interface GigabitEthernet0/0/0/3.30 et assignation de la VRF "ORANGE"
+Ensuite, nous configurons une interface physique ou sous-interface pour le VPN, et nous y assignons la VRF "ORANGE".
