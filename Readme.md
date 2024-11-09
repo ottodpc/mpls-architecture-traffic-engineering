@@ -1,3 +1,5 @@
+# PARTIE 2: 
+#QUESTION 2.1:
 # Ajout d'une nouvelle instance VPN sur l'infrastructure
 
 Dans cette section, nous allons configurer un nouveau VPN entre PE1 et PE2, en créant une instance VPN "ORANGE". Vous pouvez vous référer aux VPNs existants (GREEN et RED) pour adapter les commandes nécessaires. Nous allons procéder à la configuration, vérifier la validité de l'instance via des commandes `ping` et `traceroute`, puis tester la connectivité avec le générateur de trafic.
