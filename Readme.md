@@ -141,6 +141,7 @@ Résultat des deux donne ça:
 
 Les configurations sont similaires.
 ## 2.4. Test de connectivité avec ping:
+Lancer la commande:
 ```sudo docker exec -it Client ping 30.0.2.10```
 
 Résultat:
