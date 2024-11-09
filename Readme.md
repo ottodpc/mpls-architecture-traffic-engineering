@@ -72,6 +72,21 @@ Les deux trames appartiennent à la même session TCP, comme indiqué par les ad
 
 Cette analyse de paquet confirme la présence de labels MPLS distinguant les couches de transport et de service pour le VPN Green, permettant un flux sans interruption de PE1 vers PE2. Cette structure assure une gestion et une segmentation efficaces du trafic VPN dans le réseau MPLS.
 ## QUESTION 2.2:
+
+Le label situé juste au-dessus de la couche IPv4 dans notre VPN est attribué par le nœud **PE1** via le protocole **LDP (Label Distribution Protocol)**, qui distribue des labels MPLS aux préfixes IP pour assurer un routage efficace des paquets dans le réseau VPN.
+
+En exécutant la commande `show mpls ldp bindings`, nous pouvons voir les labels attribués localement et ceux reçus de pairs distants. Cette commande fournit le résultat suivant :
+
+![image](https://github.com/user-attachments/assets/e7f67b9e-2f03-49c7-a714-1478a20cb6f2)
+
+Dans les résultats, nous observons l'association entre les labels et les préfixes IPv4. Par exemple, pour le préfixe **172.30.0.2/32**, le label **24001** est attribué localement par **PE1**, tandis que le label **24010** est reçu d’un pair, indiquant une configuration de transport.
+
+Voici des exemples détaillés du résultat de la commande, montrant le préfixe, les labels locaux et distants, ainsi que les pairs impliqués :
+
+- **172.30.0.2/32** : Label local **24001** ; label distant **24010** attribué par le pair **172.30.0.3**.
+- **10.74.38.4/30** : Label local **ImpNull** (indiquant un transport direct sans label) et label distant **24011** pour le pair **172.30.0.2**.
+
+Ces informations montrent que **PE1** attribue des labels pour chaque préfixe en fonction de la destination, permettant au réseau MPLS de router le trafic efficacement avec des labels spécifiques.
 ## QUESTION 2.3:
 ### Ajout d'une nouvelle instance VPN sur l'infrastructure
 
