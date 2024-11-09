@@ -1,8 +1,5 @@
 # PARTIE 2: Etude des VPN et mise en place d'une nouvelle instance
 ## QUESTION 2.1:
-**Report on VPN Green Traffic Capture between P2 and P4**
-
-**Question 2.1**
 
 Effectuez une capture de trame entre P2 et P4 en utilisant la méthode décrite dans les annexes, lancez le trafic du VPN green. Décrivez le contenu d'un des paquets associé au traffic client dans le VPN (Couches OSI, Labels etc...).
 
