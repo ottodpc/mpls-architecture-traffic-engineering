@@ -129,8 +129,27 @@ L    30.0.1.1/32 is directly connected, 01:41:03, GigabitEthernet0/0/0/3.30
 B    30.0.2.0/24 [200/0] via 172.30.0.6 (nexthop in vrf default), 00:26:42
 ```
 
-# 3. Vérification de la configuration VRF sur PE1 et PE2
+## 2.3. Vérification de la configuration VRF sur PE1 et PE2
 ### Sur PE1, vérifiez la configuration de la VRF "ORANGE" :
 ```show running-config vrf ORANGE```
 ### Sur PE2, vérifiez la configuration de la VRF "ORANGE" :
 ```show running-config vrf ORANGE```
+
+Résultat des deux donne ça:
+
+![image](https://github.com/user-attachments/assets/a5d4facf-c883-4bb9-bcd9-61afc919f260)
+
+Les configurations sont similaires.
+## 2.4. Test de connectivité avec ping:
+```sudo docker exec -it Client ping 30.0.2.10```
+
+Résultat:
+
+![image](https://github.com/user-attachments/assets/3724af06-a445-4c40-a6e8-7989611a1512)
+
+# 2.5. Lancer le générateur de trafic
+Une fois le ping fonctionnel, vous pouvez lancer le générateur de trafic pour tester la connectivité du réseau. 
+avec cette commande: ```sudo bash utilis/traffic.sh start ORANGE``` qui donne effictivement cette résultat:
+
+![image](https://github.com/user-attachments/assets/f81ff202-ef44-4884-bea3-618c1d3176bc)
+
