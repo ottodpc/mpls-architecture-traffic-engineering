@@ -1,5 +1,5 @@
 # PARTIE 2: 
-## QUESTION 2.1:
+## QUESTION 2.3:
 ### Ajout d'une nouvelle instance VPN sur l'infrastructure
 
 Dans cette section, nous allons configurer un nouveau VPN entre PE1 et PE2, en créant une instance VPN "ORANGE". Vous pouvez vous référer aux VPNs existants (GREEN et RED) pour adapter les commandes nécessaires. Nous allons procéder à la configuration, vérifier la validité de l'instance via des commandes `ping` et `traceroute`, puis tester la connectivité avec le générateur de trafic.
@@ -129,3 +129,8 @@ L    30.0.1.1/32 is directly connected, 01:41:03, GigabitEthernet0/0/0/3.30
 B    30.0.2.0/24 [200/0] via 172.30.0.6 (nexthop in vrf default), 00:26:42
 ```
 
+# 3. Vérification de la configuration VRF sur PE1 et PE2
+### Sur PE1, vérifiez la configuration de la VRF "ORANGE" :
+```show running-config vrf ORANGE```
+### Sur PE2, vérifiez la configuration de la VRF "ORANGE" :
+```show running-config vrf ORANGE```
