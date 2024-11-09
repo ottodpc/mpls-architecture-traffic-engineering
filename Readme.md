@@ -3,7 +3,7 @@
 
 Effectuez une capture de trame entre P2 et P4 en utilisant la méthode décrite dans les annexes, lancez le trafic du VPN green. Décrivez le contenu d'un des paquets associé au traffic client dans le VPN (Couches OSI, Labels etc...).
 
-Command used:
+Commande utiliser:
 ```bash
 sudo bash utilis/traffic.sh start GREEN
 ```
