@@ -147,7 +147,7 @@ Résultat:
 
 ![image](https://github.com/user-attachments/assets/3724af06-a445-4c40-a6e8-7989611a1512)
 
-# 2.5. Lancer le générateur de trafic
+## 2.5. Lancer le générateur de trafic
 Une fois le ping fonctionnel, vous pouvez lancer le générateur de trafic pour tester la connectivité du réseau. 
 avec cette commande: ```sudo bash utilis/traffic.sh start ORANGE``` qui donne effictivement cette résultat:
 
