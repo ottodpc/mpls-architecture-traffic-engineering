@@ -63,3 +63,21 @@ RP/0/RP0/CPU0:PE2(config)#interface GigabitEthernet0/0/0/3.30
 RP/0/RP0/CPU0:PE2(config-subif)#vrf ORANGE  # Attribution de la VRF à l'interface
 RP/0/RP0/CPU0:PE2(config-subif)#ip address 30.0.2.1 255.255.255.0  # Attribution de l'adresse IP
 RP/0/RP0/CPU0:PE2(config-subif)#commit  # Validation de la configuration
+```
+### 2.3. Configuration du BGP pour la VRF "ORANGE"
+Nous appliquons la même configuration BGP sur PE2.
+```
+# Configuration BGP pour la VRF ORANGE sur PE2
+RP/0/RP0/CPU0:PE2(config)#router bgp 65000
+RP/0/RP0/CPU0:PE2(config-router)#address-family vpnv4 unicast
+RP/0/RP0/CPU0:PE2(config-router-af)#address-family ipv4 unicast
+RP/0/RP0/CPU0:PE2(config-router-af)#redistribute connected
+RP/0/RP0/CPU0:PE2(config-router-af)#redistribute static
+RP/0/RP0/CPU0:PE2(config-router-af)#redistribute rip
+RP/0/RP0/CPU0:PE2(config-router-af)#commit
+```
+# 2. Vérification de la configuration
+### 2.1. Vérification de la table BGP sur PE1
+Lancez la commande suivante sur PE1 pour vérifier que les routes sont bien échangées via BGP :
+```show bgp vpnv4 unicast vrf ORANGE```
+La sortie donne:
