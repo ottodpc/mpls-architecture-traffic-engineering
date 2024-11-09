@@ -12,7 +12,17 @@ sudo bash utilis/traffic.sh start GREEN
 
 ### Analyse des trames : Trame 278 et Trame 279 (Trafic VPN Green)
 
-Pour analyser le trafic VPN Green entre P2 et P4, deux trames consécutives, la Trame 278 et la Trame 279, ont été capturées. Les deux trames appartiennent à la même session TCP, comme indiqué par les adresses MAC et IP cohérentes. Les couches suivantes ont été analysées selon le modèle OSI, avec un accent sur les labels MPLS et leur usage.
+Pour analyser le trafic VPN Green entre P2 et P4, deux trames consécutives, la Trame 278 et la Trame 279, ont été capturées.
+On utilisant la commande:
+
+<img width="600" alt="capturetrafficbetweenp2andp4indirectionofPE1toPE2" src="https://github.com/user-attachments/assets/95b74ec0-2069-4393-a173-3c9e2714fe32">
+
+Et la résultat été:
+
+<img width="474" alt="mplslabels" src="https://github.com/user-attachments/assets/9f08fb1f-2b38-40d0-90f7-e172e1a94e96">
+
+
+Les deux trames appartiennent à la même session TCP, comme indiqué par les adresses MAC et IP cohérentes. Les couches suivantes ont été analysées selon le modèle OSI, avec un accent sur les labels MPLS et leur usage.
 
 ---
 
