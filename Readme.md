@@ -377,22 +377,6 @@ Label  Label       or ID              Interface                    Switched
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # PARTIE 2: Etude des VPN et mise en place d'une nouvelle instance
 ## QUESTION 2.1:
 
@@ -874,5 +858,6 @@ Cette partie est la mise en place de l'ingénierie de trafic en utilisant Segmen
    debug mpls traffic-eng
    ```
 
-#Conclusion
+#Conclusion : 
+
 Cette derrière partie de l'ingénierie de trafic avec SR-TE a permis de mettre en œuvre des tunnels optimisés et de contrôler le routage des paquets pour un réseau plus efficace. Grâce aux tunnels SR-TE, le trafic a pu être redirigé sur des chemins spécifiques, améliorant ainsi l’utilisation des ressources et la résilience du réseau.
