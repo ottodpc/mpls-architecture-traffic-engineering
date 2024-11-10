@@ -1,3 +1,383 @@
+Introduction 
+Vanilla MPLS
+Question 1.1
+
+Liste des Labels pour les Adresses de Loopback :
+
+La capture ci-dessous montre la sortie de la commande show mpls forwarding sur PE1. Cette commande nous permet de voir les labels locaux et de sortie que PE1 utilise pour atteindre les adresses de Loopback des autres routeurs.
+
+
+Différence entre "Label Local" et "Label Output" :
+
+●	Label Local : C’est le label que PE1 utilise pour reconnaître un flux MPLS entrant. En d'autres termes, c’est le label que PE1 attribue à un flux de données MPLS spécifique pour une destination donnée. 
+●	Label Output : C’est le label que PE1 applique au paquet en sortie pour qu'il soit compris par le prochain routeur dans le réseau MPLS. Ce label sera utilisé par le prochain routeur pour transférer le paquet jusqu'à la destination finale. 
+
+Pop Label : Lorsque le label de sortie est "Pop", cela signifie que PE1 retire le label avant de transmettre le paquet. Cela se produit généralement lorsque PE1 est le dernier routeur dans le chemin MPLS vers cette destination.
+
+
+Pourquoi un Label pour P2 alors qu’il est directement connecté ?
+
+Un label est utilisé pour atteindre P2, bien que ce routeur soit directement connecté, car MPLS applique un routage de bout en bout basé sur les labels pour toutes les destinations. Cela permet une gestion uniforme et simplifiée des flux MPLS, même pour les routes directement connectées. Ainsi, PE1 peut traiter tous les paquets de la même manière, sans exception pour les destinations locales, facilitant ainsi la gestion et la scalabilité du réseau MPLS.
+ 
+
+La capture ci-dessus montre les voisins LDP de PE1 obtenus avec la commande show mpls ldp neighbor. Nous voyons que PE1 a des voisins LDP, y compris des routeurs directement connectés comme 172.30.0.2 (P2). L’utilisation d’un label pour P2 permet de maintenir une uniformité dans le routage MPLS. Cette uniformité simplifie la gestion et permet une plus grande extensibilité, car le réseau traite tous les paquets de la même manière, sans exception pour les destinations locales.
+
+
+Question 1.2
+l’Adresse IP de Loopback de PE1 :
+ 
+l’Adresse IP de Loopback de PE2 :
+ 
+Ces adresses sont utilisées pour les communications de bout en bout dans le réseau MPLS et pour le tracé des chemins via traceroute mpls.
+
+d
+Traceroute de PE1 vers PE2 
+
+
+La commande traceroute mpls ipv4 exécutée sur PE1 pour atteindre l'adresse de loopback de PE2 (172.30.0.6/32) a révélé les sauts et labels suivants :
+
+Saut	Routeur 	IP Next-Hop	Label Entrant	Label Sortant
+0	10.74.38.5 (PE1)	10.74.38.6 (P2)	-	24003
+1	10.74.38.6 (P2)	10.74.38.18 (P4)	24003	24000
+2	10.74.38.18 (P4)	10.74.38.34 (PE2)	24000	implicit-null (Pop)
+
+Implicit-Null : Le dernier routeur retire le label (implicit-null) avant de livrer le paquet à la destination finale (loopback de PE2). Ce processus est appelé “PHP” (Penultimate Hop Popping) dans MPLS, où le dernier label est retiré avant l'arrivée au routeur final.
+
+Après avoir exécuté la commande traceroute mpls ipv4 sur chacun des routeurs on obtient la route suivant :
+PE1 ➡️ P2 ➡️ P4 ➡️ PE2
+ 
+
+
+Traceroute de PE2 vers PE1 
+
+
+La commande traceroute mpls ipv4 exécutée sur PE2 pour atteindre l'adresse de loopback de PE1 (172.30.0.1/32) a révélé les sauts et labels suivants :
+
+Saut	Routeur 	IP Next-Hop	Label Entrant	Label Sortant
+0	10.74.38.34 (PE2)	10.74.38.33 (P4)	-	24003
+1	10.74.38.33 (P4)	10.74.38.17 (P2)	24003	24000
+2	10.74.38.17 (P2)	10.74.38.5 (PE1)	24000	implicit-null (Pop)
+
+Implicit-Null : Le dernier routeur retire le label (implicit-null) avant de livrer le paquet à la destination finale (loopback de PE2). Ce processus est appelé “PHP” (Penultimate Hop Popping) dans MPLS, où le dernier label est retiré avant l'arrivée au routeur final.
+
+Après avoir exécuté la commande traceroute mpls ipv4 sur chacun des routeurs on obtient la route suivant :
+PE2 ➡️ P2 ➡️ P4 ➡️ PE1
+ 
+
+
+Les chemins entre PE1 et PE2 (dans les deux directions) montrent que chaque routeur applique un label spécifique pour acheminer les paquets dans le backbone MPLS. Les trajets utilisent des LSPs (Label Switched Paths) qui assurent la connectivité de bout-en-bout en appliquant un label de sortie spécifique à chaque saut. Le dernier saut retire le label via le processus "Implicit Null” pour optimiser l'acheminement. Ces résultats confirment le fonctionnement correct de MPLS et LDP pour la communication entre les routeurs PE1 et PE2.
+
+Question 1.3
+
+
+Script pour Wireshark :
+ 
+Commande pour capturer le flux transitant au niveau de l'interface Gi0-0-0-1 du router P4.
+
+Relancer la Session LDP :
+ 
+Cette action forcera l'échange des messages d'établissement de session LDP entre P2 et P4, qu’on pourrait alors observer dans Wireshark.
+
+
+Observation du Trafic :
+
+Lors de la remise du lien entre P2 et P4, deux procédures d’initialisation d’échange de messages LDP ont lieu, entre P2 ➡️ P4 et P4 ➡️ P2.
+
+Cette capture a été réalisée pour étudier les messages LDP échangés entre les routeurs P2 et P4 lors de l'établissement et du maintien d'une session LDP. Les messages analysés incluent les messages de découverte, d'initialisation, de maintien de session, et de mappage de labels. Chaque type de message joue un rôle spécifique dans l'établissement et la gestion des Label Switched Paths (LSPs) entre les routeurs.
+
+ 
+
+●	Dans la capture, les messages "Hello" sont utilisés pour découvrir les voisins LDP. Chaque routeur envoie un Hello Message pour annoncer sa présence. Par exemple, on peut voir l'adresse source 172.30.0.3 (P2) envoyant un Hello Message pour signaler sa disponibilité à 172.30.0.5 (P4).
+●	Les messages "Initialization" dans la capture permettent d'établir la session LDP entre P2 et P4. Ce message contient les informations nécessaires à la configuration de la session, telles que la version du protocole LDP et les options de session.
+●	Le Keepalive Message permet de maintenir la session LDP entre P2 et P4 active. Dans la capture, ces messages sont envoyés périodiquement pour garantir que la connexion reste stable.
+●	Le Label Mapping Message permet d'associer un label à chaque préfixe IP, facilitant ainsi l'acheminement MPLS. Par exemple, le message pour le préfixe 172.30.0.3 associe un label qui sera utilisé pour les paquets destinés à cette adresse.
+
+
+
+Question 1.4
+
+
+Signification du Label 3 (Implicit Null) : 
+
+Dans la capture précédente, certains préfixes sont associés au label 3, appelé Implicit Null. Ce label a une signification particulière dans MPLS : il est utilisé pour indiquer au dernier routeur intermédiaire (Penultimate Hop) de retirer le label avant d'envoyer le paquet au routeur de destination. Cette opération, connue sous le nom de Penultimate Hop Popping (PHP), optimise la commutation en supprimant la nécessité pour le routeur de destination de traiter le label MPLS. 
+
+En assignant le label 3, le réseau allège la charge du routeur de destination en lui envoyant le paquet directement avec l’en-tête IP, sans en-tête MPLS. Cela améliore l'efficacité du traitement des paquets.
+
+
+
+Plage de Labels Réservés et leur Utilité : 
+
+Dans MPLS, les labels réservés vont de 0 à 15 et sont utilisés pour des fonctions spécifiques. 
+
+Label 0 : Explicit Null pour IPv4, utilisé pour indiquer que le label ne doit pas être retiré afin de préserver l'en-tête IP. 
+Label 1 : Explicit Null pour IPv6. 
+Label 3 : Implicit Null, utilisé pour le Penultimate Hop Popping (PHP), demandant au dernier routeur intermédiaire de retirer le label avant de transmettre le paquet au routeur de destination.
+Labels 4 à 15 : Réservés pour des utilisations futures ou spécifiques selon les implémentations.
+
+
+Utilité de la Plage Réservée :
+
+Cette plage de labels réservés est cruciale pour assurer une gestion standardisée et efficace des paquets MPLS dans le réseau. Les labels réservés permettent de réduire la charge sur les routeurs de destination pour certains préfixes et de gérer les paquets de manière optimisée.
+
+Les tables de Commutation Partie 1 :
+
+
+RP/0/RP0/CPU0:PE1#show mpls forwarding
+Sun Nov  3 17:32:09.010 UTC
+Local  Outgoing    Prefix             Outgoing     Next Hop        Bytes       
+Label  Label       or ID              Interface                    Switched    
+------ ----------- ------------------ ------------ --------------- ------------
+24000  24004       172.30.0.2/32      Gi0/0/0/2    10.74.38.6      33364       
+24001  24002       172.30.0.4/32      Gi0/0/0/2    10.74.38.6      0           
+24002  24001       172.30.0.5/32      Gi0/0/0/2    10.74.38.6      0           
+24003  24003       172.30.0.6/32      Gi0/0/0/2    10.74.38.6      18078       
+24004  Pop         10.74.38.8/30      Gi0/0/0/2    10.74.38.6      0           
+24005  24009       10.74.38.12/30     Gi0/0/0/2    10.74.38.6      0           
+24006  24005       10.74.38.24/30     Gi0/0/0/2    10.74.38.6      0           
+24007  24008       10.74.38.20/30     Gi0/0/0/2    10.74.38.6      0           
+24008  Pop         10.74.38.16/30     Gi0/0/0/2    10.74.38.6      0           
+24009  24006       10.74.38.32/30     Gi0/0/0/2    10.74.38.6      80          
+24010  24007       10.74.38.28/30     Gi0/0/0/2    10.74.38.6      0           
+24011  Pop         172.30.0.3/32      Gi0/0/0/2    10.74.38.6      33390       
+24012  Aggregate   GREEN: Per-VRF Aggr[V]   \
+                                      GREEN                        0           
+24013  Aggregate   RED: Per-VRF Aggr[V]   \
+                                      RED                          0     
+
+
+RP/0/RP0/CPU0:P1#show mpls forwarding 
+Sun Nov  3 17:34:43.397 UTC
+Local  Outgoing    Prefix             Outgoing     Next Hop        Bytes       
+Label  Label       or ID              Interface                    Switched    
+------ ----------- ------------------ ------------ --------------- ------------
+20002  Aggregate   SR Pfx (idx 2)     default                      0           
+20003  Pop         SR Pfx (idx 3)     Gi0/0/0/3    10.74.38.10     34520       
+20004  16004       SR Pfx (idx 4)     Gi0/0/0/4    10.74.38.22     6722        
+20005  Pop         SR Pfx (idx 5)     Gi0/0/0/4    10.74.38.22     6616        
+20102  Aggregate   SR Pfx (idx 102)   default                      0           
+24000  24000       172.30.0.1/32      Gi0/0/0/3    10.74.38.10     33916       
+24001  Pop         10.74.38.4/30      Gi0/0/0/3    10.74.38.10     0           
+24002  Pop         172.30.0.5/32      Gi0/0/0/4    10.74.38.22     0           
+24003  24001       172.30.0.4/32      Gi0/0/0/4    10.74.38.22     0           
+24004  24004       10.74.38.28/30     Gi0/0/0/4    10.74.38.22     0           
+24005  Pop         10.74.38.24/30     Gi0/0/0/4    10.74.38.22     0           
+24006  Pop         10.74.38.16/30     Gi0/0/0/3    10.74.38.10     0           
+       Pop         10.74.38.16/30     Gi0/0/0/4    10.74.38.22     0           
+24007  24000       172.30.0.6/32      Gi0/0/0/4    10.74.38.22     0           
+24008  Pop         172.30.0.3/32      Gi0/0/0/3    10.74.38.10     0           
+24009  Pop         10.74.38.32/30     Gi0/0/0/4    10.74.38.22     0           
+24010  Pop         SR Adj (idx 1)     Gi0/0/0/2    10.74.38.14     0           
+24011  Pop         SR Adj (idx 3)     Gi0/0/0/2    10.74.38.14     0           
+24012  Pop         SR Adj (idx 1)     Gi0/0/0/4    10.74.38.22     0           
+24013  Pop         SR Adj (idx 3)     Gi0/0/0/4    10.74.38.22     0           
+24014  Pop         SR Adj (idx 1)     Gi0/0/0/3    10.74.38.10     0           
+24015  Pop         SR Adj (idx 3)     Gi0/0/0/3    10.74.38.10     0           
+24016  Pop         SR Adj (idx 1)     Gi0/0/0/1    10.74.38.1      0           
+24017  Pop         SR Adj (idx 3)     Gi0/0/0/1    10.74.38.1      0     
+
+
+RP/0/RP0/CPU0:P2#show mpls forwarding 
+Sun Nov  3 17:43:13.034 UTC
+Local  Outgoing    Prefix             Outgoing     Next Hop        Bytes       
+Label  Label       or ID              Interface                    Switched    
+------ ----------- ------------------ ------------ --------------- ------------
+20002  Pop         SR Pfx (idx 2)     Gi0/0/0/3    10.74.38.9      36816       
+20003  Aggregate   SR Pfx (idx 3)     default                      0           
+20004  16004       SR Pfx (idx 4)     Gi0/0/0/1    10.74.38.18     0           
+20005  Pop         SR Pfx (idx 5)     Gi0/0/0/1    10.74.38.18     7756        
+20103  Aggregate   SR Pfx (idx 103)   default                      0           
+24000  Pop         172.30.0.1/32      Gi0/0/0/2    10.74.38.5      95774       
+24001  Pop         172.30.0.5/32      Gi0/0/0/1    10.74.38.18     0           
+24002  24001       172.30.0.4/32      Gi0/0/0/1    10.74.38.18     0           
+24003  24000       172.30.0.6/32      Gi0/0/0/1    10.74.38.18     4076        
+24004  Pop         172.30.0.2/32      Gi0/0/0/3    10.74.38.9      31966       
+24005  Pop         10.74.38.24/30     Gi0/0/0/1    10.74.38.18     0           
+24006  Pop         10.74.38.32/30     Gi0/0/0/1    10.74.38.18     0           
+24007  24004       10.74.38.28/30     Gi0/0/0/1    10.74.38.18     0           
+24008  Pop         10.74.38.20/30     Gi0/0/0/1    10.74.38.18     0           
+       Pop         10.74.38.20/30     Gi0/0/0/3    10.74.38.9      0           
+24009  Pop         10.74.38.12/30     Gi0/0/0/3    10.74.38.9      0           
+24010  Pop         10.74.38.0/30      Gi0/0/0/2    10.74.38.5      0           
+       Pop         10.74.38.0/30      Gi0/0/0/3    10.74.38.9      0           
+24011  Pop         SR Adj (idx 1)     Gi0/0/0/1    10.74.38.18     0           
+24012  Pop         SR Adj (idx 3)     Gi0/0/0/1    10.74.38.18     0           
+24013  Pop         SR Adj (idx 1)     Gi0/0/0/3    10.74.38.9      0           
+24014  Pop         SR Adj (idx 3)     Gi0/0/0/3    10.74.38.9      0           
+24015  Pop         SR Adj (idx 1)     Gi0/0/0/2    10.74.38.5      0           
+24016  Pop         SR Adj (idx 3)     Gi0/0/0/2    10.74.38.5      0   
+
+
+
+RP/0/RP0/CPU0:P3#show mpls forwarding 
+Sun Nov  3 17:48:01.581 UTC
+Local  Outgoing    Prefix             Outgoing     Next Hop        Bytes       
+Label  Label       or ID              Interface                    Switched    
+------ ----------- ------------------ ------------ --------------- ------------
+20002  16002       SR Pfx (idx 2)     Gi0/0/0/3    10.74.38.26     8286        
+20003  16003       SR Pfx (idx 3)     Gi0/0/0/3    10.74.38.26     0           
+20004  Aggregate   SR Pfx (idx 4)     default                      0           
+20005  Pop         SR Pfx (idx 5)     Gi0/0/0/3    10.74.38.26     9818        
+20104  Aggregate   SR Pfx (idx 104)   default                      0           
+24000  24002       172.30.0.2/32      Gi0/0/0/3    10.74.38.26     0           
+24001  Pop         172.30.0.5/32      Gi0/0/0/3    10.74.38.26     0           
+24002  24000       172.30.0.6/32      Gi0/0/0/3    10.74.38.26     8224        
+24003  24003       172.30.0.1/32      Gi0/0/0/3    10.74.38.26     0           
+24004  24006       10.74.38.8/30      Gi0/0/0/3    10.74.38.26     0           
+24005  Pop         10.74.38.20/30     Gi0/0/0/3    10.74.38.26     0           
+24006  Pop         10.74.38.16/30     Gi0/0/0/3    10.74.38.26     0           
+24007  Pop         10.74.38.32/30     Gi0/0/0/3    10.74.38.26     0           
+24008  24007       10.74.38.4/30      Gi0/0/0/3    10.74.38.26     0           
+24009  24008       10.74.38.0/30      Gi0/0/0/3    10.74.38.26     0           
+24010  24009       172.30.0.3/32      Gi0/0/0/3    10.74.38.26     0           
+24011  Pop         SR Adj (idx 1)     Gi0/0/0/1    10.74.38.30     0           
+24012  Pop         SR Adj (idx 3)     Gi0/0/0/1    10.74.38.30     0           
+24013  Pop         SR Adj (idx 1)     Gi0/0/0/3    10.74.38.26     0           
+24014  Pop         SR Adj (idx 3)     Gi0/0/0/3    10.74.38.26     0           
+24015  Pop         SR Adj (idx 1)     Gi0/0/0/2    10.74.38.13     0           
+24016  Pop         SR Adj (idx 3)     Gi0/0/0/2    10.74.38.13     0  
+
+
+RP/0/RP0/CPU0:P4#show mpls forwarding 
+Sun Nov  3 17:47:30.078 UTC
+Local  Outgoing    Prefix             Outgoing     Next Hop        Bytes       
+Label  Label       or ID              Interface                    Switched    
+------ ----------- ------------------ ------------ --------------- ------------
+16002  Pop         SR Pfx (idx 2)     Gi0/0/0/4    10.74.38.21     17936       
+16003  Pop         SR Pfx (idx 3)     Gi0/0/0/1    10.74.38.17     12958       
+16004  Pop         SR Pfx (idx 4)     Gi0/0/0/3    10.74.38.25     18046       
+16005  Aggregate   SR Pfx (idx 5)     default                      0           
+16105  Aggregate   SR Pfx (idx 105)   default                      0           
+24000  Pop         172.30.0.6/32      Gi0/0/0/2    10.74.38.34     19946       
+24001  Pop         172.30.0.4/32      Gi0/0/0/3    10.74.38.25     7546        
+24002  Pop         172.30.0.2/32      Gi0/0/0/4    10.74.38.21     0           
+24003  24000       172.30.0.1/32      Gi0/0/0/1    10.74.38.17     7276        
+24004  Pop         10.74.38.28/30     Gi0/0/0/2    10.74.38.34     0           
+       Pop         10.74.38.28/30     Gi0/0/0/3    10.74.38.25     0           
+24005  Pop         10.74.38.12/30     Gi0/0/0/3    10.74.38.25     0           
+       Pop         10.74.38.12/30     Gi0/0/0/4    10.74.38.21     0           
+24006  Pop         10.74.38.8/30      Gi0/0/0/1    10.74.38.17     0           
+       Pop         10.74.38.8/30      Gi0/0/0/4    10.74.38.21     0           
+24007  Pop         10.74.38.4/30      Gi0/0/0/1    10.74.38.17     0           
+24008  Pop         10.74.38.0/30      Gi0/0/0/4    10.74.38.21     0           
+24009  Pop         172.30.0.3/32      Gi0/0/0/1    10.74.38.17     0           
+24010  Pop         SR Adj (idx 1)     Gi0/0/0/2    10.74.38.34     0           
+24011  Pop         SR Adj (idx 3)     Gi0/0/0/2    10.74.38.34     0           
+24012  Pop         SR Adj (idx 1)     Gi0/0/0/3    10.74.38.25     0           
+24013  Pop         SR Adj (idx 3)     Gi0/0/0/3    10.74.38.25     0           
+24014  Pop         SR Adj (idx 1)     Gi0/0/0/4    10.74.38.21     0           
+24015  Pop         SR Adj (idx 3)     Gi0/0/0/4    10.74.38.21     0           
+24016  Pop         SR Adj (idx 1)     Gi0/0/0/1    10.74.38.17     0           
+24017  Pop         SR Adj (idx 3)     Gi0/0/0/1    10.74.38.17     0    
+
+
+
+RP/0/RP0/CPU0:PE2#show mpls forwarding 
+Sun Nov  3 18:01:41.202 UTC
+Local  Outgoing    Prefix             Outgoing     Next Hop        Bytes       
+Label  Label       or ID              Interface                    Switched    
+------ ----------- ------------------ ------------ --------------- ------------
+24000  24001       172.30.0.4/32      Gi0/0/0/2    10.74.38.33     9902        
+24001  Pop         172.30.0.5/32      Gi0/0/0/2    10.74.38.33     10026       
+24002  24002       172.30.0.2/32      Gi0/0/0/2    10.74.38.33     0           
+24003  24003       172.30.0.1/32      Gi0/0/0/2    10.74.38.33     8774        
+24004  Pop         10.74.38.24/30     Gi0/0/0/2    10.74.38.33     0           
+24005  Pop         10.74.38.16/30     Gi0/0/0/2    10.74.38.33     0           
+24006  Pop         10.74.38.20/30     Gi0/0/0/2    10.74.38.33     0           
+24007  24005       10.74.38.12/30     Gi0/0/0/2    10.74.38.33     0           
+24008  24006       10.74.38.8/30      Gi0/0/0/2    10.74.38.33     0           
+24009  24007       10.74.38.4/30      Gi0/0/0/2    10.74.38.33     0           
+24010  24008       10.74.38.0/30      Gi0/0/0/2    10.74.38.33     0           
+24011  24009       172.30.0.3/32      Gi0/0/0/2    10.74.38.33     0           
+24012  Aggregate   GREEN: Per-VRF Aggr[V]   \
+                                      GREEN                        0           
+24013  Aggregate   RED: Per-VRF Aggr[V]   \
+                                      RED                          0 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # PARTIE 2: Etude des VPN et mise en place d'une nouvelle instance
 ## QUESTION 2.1:
 
