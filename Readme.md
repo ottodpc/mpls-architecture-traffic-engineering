@@ -244,3 +244,111 @@ avec cette commande: ```sudo bash utilis/traffic.sh start ORANGE``` qui donne ef
 
 # Conclusion
 La configuration de l'instance VPN "ORANGE" a été réalisée avec succès sur les routeurs PE1 et PE2. Les tests de connectivité, incluant les commandes ping et traceroute, ont confirmé que le VPN est opérationnel et que les routes sont correctement échangées entre les deux points. 
+
+
+
+
+# PARTIE 3: migration de MPLS LDP vers SR-MPLS
+# Étape 1 : Activation de SR sur les routeurs d'extrémité (PE)
+
+Objectif : Activer Segment Routing (SR) sur les routeurs PE (Provider Edge), afin que les routes et labels SR soient propagés par l’IGP (ISIS) sans perturber le trafic client, car LDP reste actif et prioritaire.
+
+# Configuration sur les routeurs PE (PE1 et PE2)
+
+1. Activez Segment Routing avec une plage globale de labels (SRGB) et assignez un index SID pour l’interface Loopback0 :
+   ```bash
+   router isis IGP
+     segment-routing global-block 20000 23999  # Définition de la plage de labels
+     address-family ipv4 unicast
+       segment-routing mpls  # Activation de SR pour l’IGP ISIS
+     interface Loopback0
+       address-family ipv4 unicast
+         prefix-sid index 1  # Assigne le SID index 1 pour PE1 et un autre pour PE2
+   ```
+   - **Remarque** : L’index `1` est un exemple et doit être unique par routeur dans le réseau pour identifier chaque PE de manière univoque.
+
+#### Vérification
+
+2. **Afficher la table des labels** : Vérifiez que les labels SR sont bien générés en exécutant la commande suivante sur les routeurs PE :
+   ```bash
+   show mpls forwarding-table
+   ```
+
+3. **Traceroute SR-MPLS** : Effectuez un test de connectivité en forçant l’utilisation des labels SR avec `traceroute sr-mpls` :
+   ```bash
+   traceroute sr-mpls PE2_Loopback0
+   ```
+   - **But** : Cette commande permet de valider que le chemin de bout en bout entre PE1 et PE2 utilise SR, bien que LDP reste prioritaire pour le trafic par défaut.
+
+---
+
+### Étape 2 : Priorisation de SR vis-à-vis de LDP
+
+**Objectif** : Modifier la configuration ISIS pour que SR-MPLS devienne prioritaire sur LDP, tout en assurant la connectivité via LDP pour les routes non encore migrées.
+
+#### Configuration sur les routeurs PE (PE1 et PE2)
+
+1. **Prioriser SR dans l’IGP ISIS** :
+   ```bash
+   router isis IGP
+     address-family ipv4 unicast
+       segment-routing mpls sr-prefer
+   ```
+
+#### Vérification
+
+2. **Traceroute SR-MPLS avec priorisation** : Effectuez un `traceroute sr-mpls` entre PE1 et PE2 pour observer l’utilisation des labels SR à chaque saut.
+   ```bash
+   traceroute sr-mpls PE2_Loopback0
+   ```
+   - **Observation** : Si le trafic utilise les labels SR, vous devriez constater un changement de labels à chaque saut, ce qui indique l’activation de SR-MPLS comme mode de commutation prioritaire.
+
+---
+
+### Étape 3 : Désactivation de LDP
+
+**Objectif** : Désactiver LDP sur tous les routeurs de l'infrastructure (PE et P) pour garantir que SR-MPLS est le seul protocole MPLS utilisé pour le routage entre les PE.
+
+#### Configuration sur tous les routeurs (PE1, PE2, P1, P2, P3, P4)
+
+1. **Supprimer LDP de la configuration des interfaces et du processus IGP** :
+   ```bash
+   router isis IGP
+     address-family ipv4 unicast
+       no mpls ldp auto-config
+     exit
+   interface GigabitEthernetX/Y
+     address-family ipv4 unicast
+       no mpls ldp sync
+   exit
+   no mpls ldp
+   ```
+
+#### Vérification
+
+2. **Capture de paquets entre P2 et P4** : Effectuez une capture de paquets pour analyser les informations SR en cours de propagation, en utilisant un outil de capture comme `tcpdump`. Recherchez :
+   - **SRGB** de PE2 : Plage de labels utilisée par PE2 pour SR.
+   - **Node SID** de PE2 : SID unique associé à PE2.
+   - **Label pour le segment P3 vers PE2** : Vérifiez le label de routage entre P3 et PE2.
+   - **Algorithmes supportés par PE2** : Identifiez les algorithmes SR annoncés dans l’IGP.
+
+3. **Afficher la base de données ISIS pour les détails SR** :
+   ```bash
+   show isis database verbose
+   ```
+   - **But** : La base de données ISIS contiendra les TLVs (Type-Length-Values) relatifs à SR, confirmant la propagation correcte des informations de routage et des labels SR.
+
+4. **Redémarrer ISIS pour rafraîchir les sessions et les labels** :
+   ```bash
+   clear isis process
+   ```
+   - **Conseil** : Si nécessaire, redémarrez l’IGP pour rafraîchir les sessions et assurer que les labels sont bien assignés et propagés.
+
+---
+
+Conclusion
+
+Cette méthode progressive permet une transition en douceur de LDP à SR-MPLS, garantissant une continuité de service pour les clients sans interruption. Si certains labels de la plage SRGB sont déjà utilisés, un redémarrage des routeurs peut être requis pour éviter tout conflit d'assignation de labels.
+
+
+
