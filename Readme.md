@@ -660,37 +660,37 @@ Objectif : Activer Segment Routing (SR) sur les routeurs PE (Provider Edge), afi
        address-family ipv4 unicast
          prefix-sid index 1  # Assigne le SID index 1 pour PE1 et un autre pour PE2
    ```
-   - **Remarque** : L’index `1` est un exemple et doit être unique par routeur dans le réseau pour identifier chaque PE de manière univoque.
+   - Remarque : L’index `1` est un exemple et doit être unique par routeur dans le réseau pour identifier chaque PE de manière univoque.
 
-#### Vérification
+# Vérification
 
-2. **Afficher la table des labels** : Vérifiez que les labels SR sont bien générés en exécutant la commande suivante sur les routeurs PE :
+2. Afficher la table des labels : Vérifiez que les labels SR sont bien générés en exécutant la commande suivante sur les routeurs PE :
    ```bash
    show mpls forwarding-table
    ```
 
-3. **Traceroute SR-MPLS** : Effectuez un test de connectivité en forçant l’utilisation des labels SR avec `traceroute sr-mpls` :
+3. Traceroute SR-MPLS : Effectuez un test de connectivité en forçant l’utilisation des labels SR avec `traceroute sr-mpls` :
    ```bash
    traceroute sr-mpls PE2_Loopback0
    ```
-   - **But** : Cette commande permet de valider que le chemin de bout en bout entre PE1 et PE2 utilise SR, bien que LDP reste prioritaire pour le trafic par défaut.
+   - But : Cette commande permet de valider que le chemin de bout en bout entre PE1 et PE2 utilise SR, bien que LDP reste prioritaire pour le trafic par défaut.
 
 ---
 
-### Étape 2 : Priorisation de SR vis-à-vis de LDP
+# Étape 2 : Priorisation de SR vis-à-vis de LDP
 
-**Objectif** : Modifier la configuration ISIS pour que SR-MPLS devienne prioritaire sur LDP, tout en assurant la connectivité via LDP pour les routes non encore migrées.
+Objectif : Modifier la configuration ISIS pour que SR-MPLS devienne prioritaire sur LDP, tout en assurant la connectivité via LDP pour les routes non encore migrées.
 
-#### Configuration sur les routeurs PE (PE1 et PE2)
+# Configuration sur les routeurs PE (PE1 et PE2)
 
-1. **Prioriser SR dans l’IGP ISIS** :
+1. Prioriser SR dans l’IGP ISIS :
    ```bash
    router isis IGP
      address-family ipv4 unicast
        segment-routing mpls sr-prefer
    ```
 
-#### Vérification
+#Vérification
 
 2. **Traceroute SR-MPLS avec priorisation** : Effectuez un `traceroute sr-mpls` entre PE1 et PE2 pour observer l’utilisation des labels SR à chaque saut.
    ```bash
@@ -700,11 +700,10 @@ Objectif : Activer Segment Routing (SR) sur les routeurs PE (Provider Edge), afi
 
 ---
 
-### Étape 3 : Désactivation de LDP
+#Étape 3 : Désactivation de LDP
+Objectif : Désactiver LDP sur tous les routeurs de l'infrastructure (PE et P) pour garantir que SR-MPLS est le seul protocole MPLS utilisé pour le routage entre les PE.
 
-**Objectif** : Désactiver LDP sur tous les routeurs de l'infrastructure (PE et P) pour garantir que SR-MPLS est le seul protocole MPLS utilisé pour le routage entre les PE.
-
-#### Configuration sur tous les routeurs (PE1, PE2, P1, P2, P3, P4)
+# Configuration sur tous les routeurs (PE1, PE2, P1, P2, P3, P4)
 
 1. **Supprimer LDP de la configuration des interfaces et du processus IGP** :
    ```bash
@@ -719,19 +718,19 @@ Objectif : Activer Segment Routing (SR) sur les routeurs PE (Provider Edge), afi
    no mpls ldp
    ```
 
-#### Vérification
+# Vérification
 
 2. **Capture de paquets entre P2 et P4** : Effectuez une capture de paquets pour analyser les informations SR en cours de propagation, en utilisant un outil de capture comme `tcpdump`. Recherchez :
-   - **SRGB** de PE2 : Plage de labels utilisée par PE2 pour SR.
-   - **Node SID** de PE2 : SID unique associé à PE2.
-   - **Label pour le segment P3 vers PE2** : Vérifiez le label de routage entre P3 et PE2.
-   - **Algorithmes supportés par PE2** : Identifiez les algorithmes SR annoncés dans l’IGP.
+   - SRGB de PE2 : Plage de labels utilisée par PE2 pour SR.
+   - Node SID de PE2 : SID unique associé à PE2.
+   - Label pour le segment P3 vers PE2 : Vérifiez le label de routage entre P3 et PE2.
+   - Algorithmes supportés par PE2 : Identifiez les algorithmes SR annoncés dans l’IGP.
 
 3. **Afficher la base de données ISIS pour les détails SR** :
    ```bash
    show isis database verbose
    ```
-   - **But** : La base de données ISIS contiendra les TLVs (Type-Length-Values) relatifs à SR, confirmant la propagation correcte des informations de routage et des labels SR.
+   - But : La base de données ISIS contiendra les TLVs (Type-Length-Values) relatifs à SR, confirmant la propagation correcte des informations de routage et des labels SR.
 
 4. **Redémarrer ISIS pour rafraîchir les sessions et les labels** :
    ```bash
@@ -747,3 +746,133 @@ Cette méthode progressive permet une transition en douceur de LDP à SR-MPLS, g
 
 
 
+
+# Rapport Partie 3: Ingénierie de Trafic avec Segment Routing Traffic Engineering (SR-TE)
+
+
+![image](https://github.com/user-attachments/assets/d6a54fdc-9804-43b6-9ba8-6413b3453864)
+
+
+# Objectifs
+Cette partie est la mise en place de l'ingénierie de trafic en utilisant Segment Routing Traffic Engineering (SR-TE). L'objectif est de maîtriser les concepts d’optimisation de chemin, de contrôle du trafic et d’amélioration de l'efficacité des ressources réseau à l'aide de tunnels SR-TE.
+
+---
+
+# Question 1 : Configuration des Interfaces et Routage de Base
+
+# Étapes et Commandes
+
+1. Configuration des adresses IP sur les interfaces :
+   - Connectez-vous sur chaque routeur et configurez les adresses IP pour établir la connectivité de base entre les équipements.
+   ```bash
+   configure terminal
+   interface GigabitEthernet0/0
+   ip address 192.168.1.1 255.255.255.0
+   no shutdown
+   ```
+
+2. Vérification de la connectivité :
+   - Vérifiez la connectivité entre les équipements pour vous assurer que chaque routeur est joignable via les adresses IP configurées.
+   ```bash
+   ping 192.168.1.2
+   ```
+
+3. Configuration du routage statique (si nécessaire) :
+   - Ajoutez des routes statiques pour diriger le trafic entre les sous-réseaux si un routage dynamique n'est pas encore configuré.
+   ```bash
+   ip route 192.168.2.0 255.255.255.0 192.168.1.2
+   ```
+
+# Question 2 : Activation du Segment Routing (SR)
+# Étapes et Commandes
+
+1. Activer le Segment Routing sur chaque routeur :
+   - Configurez le Segment Routing pour chaque routeur en utilisant le protocole IGP (ex : OSPF ou IS-IS).
+   ```bash
+   configure terminal
+   router ospf 1
+   segment-routing mpls
+   ```
+
+2. Vérification de la configuration Segment Routing :
+   - Assurez-vous que la configuration Segment Routing est active en affichant les routes SR dans la table de routage.
+   ```bash
+   show ip route
+   ```
+
+# Question 3 : Création et Configuration des Tunnels SR-TE
+# Étapes et Commandes
+
+1. Configuration de l'interface de tunnel :
+   - Configurez des tunnels SR-TE pour guider le trafic à travers des chemins spécifiques dans le réseau.
+   ```bash
+   configure terminal
+   interface Tunnel1
+   ip unnumbered Loopback0
+   tunnel mode mpls traffic-eng
+   tunnel mpls traffic-eng autoroute announce
+   tunnel destination 192.168.2.1
+   ```
+
+2. Définir les segments de chemin et les contraintes :
+   - Définissez les segments et contraintes pour chaque tunnel, comme les ressources de bande passante.
+   ```bash
+   mpls traffic-eng path-option 1 explicit name SR-Path
+   ```
+
+3. Activation des chemins explicites et vérification :
+   - Assurez-vous que les tunnels sont activés et vérifiez leur état et leur chemin emprunté.
+   ```bash
+   show mpls traffic-eng tunnels
+   ```
+
+# Question 4 : Contrôle et Redirection du Trafic via SR-TE
+# Étapes et Commandes
+
+1. Configurer des règles de routage pour utiliser les tunnels SR-TE :
+   - Utilisez des route-maps pour rediriger certains flux de trafic dans des tunnels spécifiques.
+   ```bash
+   route-map SR-TE permit 10
+   match ip address 101
+   set ip next-hop Tunnel1
+   ```
+
+2. Appliquer la route-map sur les interfaces :
+   - Appliquez la route-map configurée sur les interfaces appropriées pour rediriger le trafic.
+   ```bash
+   interface GigabitEthernet0/0
+   ip policy route-map SR-TE
+   ```
+
+3. Vérification de la redirection du trafic :
+   - Surveillez l'utilisation des tunnels et assurez-vous que le trafic emprunte bien les chemins spécifiés.
+   ```bash
+   show ip traffic
+   ```
+
+---
+
+# Question 5 : Surveillance et Dépannage des Tunnels SR-TE
+# Étapes et Commandes
+
+1. Surveillance des tunnels SR-TE :
+   - Utilisez des commandes de surveillance pour suivre l’état des tunnels et le trafic qu’ils transportent.
+   ```bash
+   show mpls traffic-eng tunnels statistics
+   ```
+
+2. Analyse des statistiques de trafic :
+   - Utilisez des commandes pour analyser les performances des tunnels et ajuster les chemins en cas de surcharge.
+   ```bash
+   show mpls traffic-eng tunnels brief
+   ```
+
+3. **Dépannage des problèmes de connectivité** :
+   - Effectuez des diagnostics si le trafic ne suit pas les chemins configurés ou si des tunnels sont inactifs.
+   ```bash
+   traceroute 192.168.2.1
+   debug mpls traffic-eng
+   ```
+
+#Conclusion
+Cette derrière partie de l'ingénierie de trafic avec SR-TE a permis de mettre en œuvre des tunnels optimisés et de contrôler le routage des paquets pour un réseau plus efficace. Grâce aux tunnels SR-TE, le trafic a pu être redirigé sur des chemins spécifiques, améliorant ainsi l’utilisation des ressources et la résilience du réseau.
