@@ -6,6 +6,9 @@ Liste des Labels pour les Adresses de Loopback :
 
 La capture ci-dessous montre la sortie de la commande show mpls forwarding sur PE1. Cette commande nous permet de voir les labels locaux et de sortie que PE1 utilise pour atteindre les adresses de Loopback des autres routeurs.
 
+![image](https://github.com/user-attachments/assets/73935219-2853-464d-9dd5-78e74fad2730)
+
+
 
 Différence entre "Label Local" et "Label Output" :
 
@@ -18,16 +21,25 @@ Pop Label : Lorsque le label de sortie est "Pop", cela signifie que PE1 retire l
 Pourquoi un Label pour P2 alors qu’il est directement connecté ?
 
 Un label est utilisé pour atteindre P2, bien que ce routeur soit directement connecté, car MPLS applique un routage de bout en bout basé sur les labels pour toutes les destinations. Cela permet une gestion uniforme et simplifiée des flux MPLS, même pour les routes directement connectées. Ainsi, PE1 peut traiter tous les paquets de la même manière, sans exception pour les destinations locales, facilitant ainsi la gestion et la scalabilité du réseau MPLS.
- 
+
+
+ ![image](https://github.com/user-attachments/assets/c9111b00-a0b9-452f-9c1c-71a0c31c5cc4)
+
 
 La capture ci-dessus montre les voisins LDP de PE1 obtenus avec la commande show mpls ldp neighbor. Nous voyons que PE1 a des voisins LDP, y compris des routeurs directement connectés comme 172.30.0.2 (P2). L’utilisation d’un label pour P2 permet de maintenir une uniformité dans le routage MPLS. Cette uniformité simplifie la gestion et permet une plus grande extensibilité, car le réseau traite tous les paquets de la même manière, sans exception pour les destinations locales.
 
 
 Question 1.2
 l’Adresse IP de Loopback de PE1 :
- 
+
+
+ ![image](https://github.com/user-attachments/assets/ee10988a-e6ea-4cd2-b89b-c53ca8d8efb5)
+
 l’Adresse IP de Loopback de PE2 :
- 
+
+
+ ![image](https://github.com/user-attachments/assets/376740cc-4480-43ea-a928-4b54f4231fd0)
+
 Ces adresses sont utilisées pour les communications de bout en bout dans le réseau MPLS et pour le tracé des chemins via traceroute mpls.
 
 d
